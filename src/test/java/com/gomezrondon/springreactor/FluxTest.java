@@ -15,6 +15,23 @@ public class FluxTest {
 
 
     @Test
+    @DisplayName("connectable Flux send data only with 2 subscribers") // aka a Hot Flux
+    void test8() {
+        var flux = Flux.range(1, 5)
+                .log() // to avoid the unbounded message it must be first
+                .delayElements(Duration.ofMillis(100))
+                .publish()
+                .autoConnect(2);
+
+        StepVerifier.create(flux)// first connection
+                .then(flux::subscribe) // second connection
+                .expectNext(1, 2, 3, 4, 5 )
+                .expectComplete()
+                .verify();
+    }
+
+
+    @Test
     @DisplayName("connectable Flux") // aka a Hot Flux
     void test7() {
         var flux = Flux.range(1, 10)
