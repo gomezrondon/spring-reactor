@@ -13,6 +13,39 @@ import java.time.Duration;
 @Slf4j
 public class FluxTest {
 
+
+    @Test
+    @DisplayName("connectable Flux") // aka a Hot Flux
+    void test7() {
+        var flux = Flux.range(1, 10)
+                .log() // to avoid the unbounded message it must be first
+                .delayElements(Duration.ofMillis(100))
+                .publish();
+
+        StepVerifier.create(flux)
+                .then(flux::connect)
+                .expectNext(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .expectComplete()
+                .verify();
+    }
+
+
+    @Test
+    @DisplayName("flux with pretty BackPressure")
+    void test6() {
+
+
+        var flux = Flux.range(1, 10)
+                .log() // to avoid the unbounded message it must be first
+                .limitRate(2);
+
+//flux.limitRate(2).subscribe();
+
+        StepVerifier.create(flux)
+                .expectNext(1, 2, 3, 4, 5,6, 7, 8, 9, 10)
+                .verifyComplete();
+    }
+
     @Test
     @DisplayName("flux with Interval One")
     void test5() {
@@ -21,19 +54,18 @@ public class FluxTest {
 
         StepVerifier.withVirtualTime(this::getFluxInterval)
                 .expectSubscription()
-                .thenAwait(Duration.ofMillis(100))
+                //.expectNoEvent(Duration.ofHours(2))
+                .thenAwait(Duration.ofDays(1))
                 .expectNext(0L)
-                .thenAwait(Duration.ofMillis(100))
+                .thenAwait(Duration.ofDays(1))
                 .expectNext(1L)
                 .thenCancel()
                 .verify();
-
     }
 
 
     private Flux<Long> getFluxInterval() {
-        return Flux.interval(Duration.ofMillis(100))
-               // .take(10)
+        return Flux.interval(Duration.ofDays(1))
                 .log();
     }
 
