@@ -8,8 +8,35 @@ import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
+
 @Slf4j
 public class FluxTest {
+
+    @Test
+    @DisplayName("flux with Interval One")
+    void test5() {
+    //    Flux<Long> interval = getFluxInterval();
+   //     interval.subscribe(i -> log.info("number {}", i));
+
+        StepVerifier.withVirtualTime(this::getFluxInterval)
+                .expectSubscription()
+                .thenAwait(Duration.ofMillis(100))
+                .expectNext(0L)
+                .thenAwait(Duration.ofMillis(100))
+                .expectNext(1L)
+                .thenCancel()
+                .verify();
+
+    }
+
+
+    private Flux<Long> getFluxInterval() {
+        return Flux.interval(Duration.ofMillis(100))
+               // .take(10)
+                .log();
+    }
+
 
     @Test
     @DisplayName("flux with BackPressure")
