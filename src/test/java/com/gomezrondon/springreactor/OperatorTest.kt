@@ -12,7 +12,6 @@ import reactor.core.scheduler.Schedulers
 import reactor.test.StepVerifier
 import java.nio.file.Files
 import java.nio.file.Path
-import java.time.Duration
 
 @Slf4j
 class OperatorTest {
@@ -21,19 +20,39 @@ class OperatorTest {
         private val log = LoggerFactory.getLogger(OperatorTest::class.java.name)
     }
 
+
+
+    @Test
+    @DisplayName("switch if empty operator")
+    fun test8() {
+        val message = "hola"
+        val switch = emptyFlux().switchIfEmpty(Flux.just("hola"))
+
+        StepVerifier.create(switch)
+                .expectSubscription()
+                .expectNext(message)
+                .verifyComplete()
+    }
+
+    fun emptyFlux(): Flux<Any> {
+        return Flux.empty()
+    }
+
+
     @Test
     @DisplayName("read a file in a background thread")
     fun test3() {
-        val list: Mono<MutableList<String>> = Mono.fromCallable { Files.readAllLines(Path.of("text-file.txt")) }
+        val list: Mono<MutableList<String>> = Mono
+                .fromCallable { Files.readAllLines(Path.of("text-file.txt")) }
                 .log()
                 .subscribeOn(Schedulers.boundedElastic()) // read from a background thread
 
-       // list.subscribe { log.info("{}",it) }
+        // list.subscribe { log.info("{}",it) }
 
         StepVerifier.create(list)
-                .thenConsumeWhile{
+                .thenConsumeWhile {
                     Assertions.assertFalse(it.isEmpty())
-                    log.info("size {}",it.size)
+                    log.info("size {}", it.size)
                     true
                 }
                 .verifyComplete()
@@ -45,17 +64,19 @@ class OperatorTest {
     fun test2() {
         val flux = Flux.range(1, 4)
                 .log() // to avoid the unbounded message it must be first
-                .map { log.info("Map 1 - number {} on thread {}", it, Thread.currentThread().name)
+                .map {
+                    log.info("Map 1 - number {} on thread {}", it, Thread.currentThread().name)
                     it
                 }.publishOn(Schedulers.single()) // affect only here and forward.
-                .map { log.info("Map 2 - number {} on thread {}", it, Thread.currentThread().name)
+                .map {
+                    log.info("Map 2 - number {} on thread {}", it, Thread.currentThread().name)
                     it
                 }
 
 
         StepVerifier.create(flux) // first connection
                 .expectSubscription()
-                .expectNext(1, 2, 3, 4 )
+                .expectNext(1, 2, 3, 4)
                 .verifyComplete()
     }
 
@@ -64,17 +85,19 @@ class OperatorTest {
     fun test1() {
         val flux = Flux.range(1, 4)
                 .log() // to avoid the unbounded message it must be first
-                .map { log.info("Map 1 - number {} on thread {}", it, Thread.currentThread().name)
+                .map {
+                    log.info("Map 1 - number {} on thread {}", it, Thread.currentThread().name)
                     it
                 }.subscribeOn(Schedulers.single()) // affect all the flux from begining to end
-                .map { log.info("Map 2 - number {} on thread {}", it, Thread.currentThread().name)
+                .map {
+                    log.info("Map 2 - number {} on thread {}", it, Thread.currentThread().name)
                     it
                 }
 
 
         StepVerifier.create(flux) // first connection
                 .expectSubscription()
-                .expectNext(1, 2, 3, 4 )
+                .expectNext(1, 2, 3, 4)
                 .verifyComplete()
     }
 
