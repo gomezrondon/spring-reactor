@@ -6,12 +6,60 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class FluxTest {
+
+
+
+    @Test
+    @DisplayName("flux concat letters 2 by 2")
+    void test11() {
+        var flux = Flux.fromIterable(List.of("a", "b", "c", "d", "e", "f"))
+                .window(2)
+                .flatMap(stringFlux -> stringFlux.collect(Collectors.joining()))  // a -> list[a, new]
+                ;
+
+      //  flux.subscribe(System.out::println);
+        StepVerifier.create(flux)
+                .expectNext("ab", "cd","ef")
+                //  .expectNextCount(9) //this works
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("flux with window")
+    void test10() {
+        var flux = Flux.fromIterable(List.of("a", "b", "c", "d", "e", "f"))
+                .window(2)
+                .flatMap(stringFlux -> stringFlux.concatWithValues("End"))  // a -> list[a, new]
+                ;
+
+        flux.subscribe(System.out::println);
+        StepVerifier.create(flux)
+                 .expectNext("a", "b","End", "c", "d","End", "e", "f","End")
+              //  .expectNextCount(9) //this works
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("flux with flatmap")
+    void test9() {
+        var flux = Flux.fromIterable(List.of("a", "b", "c", "d", "e", "f"))
+                .flatMap( s -> Flux.fromIterable(Arrays.asList(s)));
+
+        StepVerifier.create(flux)
+               .expectNext("a", "b", "c", "d", "e", "f")
+               // .expectNext(Flux.just("A", "B"),Flux.just("C", "D"),Flux.just("E", "F"))
+                .verifyComplete();
+    }
 
 
     @Test
@@ -145,7 +193,8 @@ public class FluxTest {
 
         StepVerifier.create(flux)
                 .expectNext(1, 2, 3)
-                .expectError(IndexOutOfBoundsException.class)
+                //.expectError(IndexOutOfBoundsException.class)
+                .expectErrorMessage("index error")
                 .verify();
     }
 

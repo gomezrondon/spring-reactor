@@ -18,12 +18,12 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 
 	compile 'io.projectreactor:reactor-core:3.3.9.RELEASE'
-	implementation 'org.springframework.boot:spring-boot-starter'
 	compile 'io.projectreactor:reactor-test:3.3.9.RELEASE'
+	implementation 'org.springframework.boot:spring-boot-starter'
 	compile 'org.junit.jupiter:junit-jupiter-api:5.6.2'
 
-	compile 'org.slf4j:slf4j-api:1.7.30'
-	compile 'org.slf4j:slf4j-simple:1.7.30'
+/*	compile 'org.slf4j:slf4j-api:1.7.30'
+	compile 'org.slf4j:slf4j-simple:1.7.30'*/
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
