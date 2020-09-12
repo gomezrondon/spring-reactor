@@ -18,6 +18,40 @@ import java.util.stream.Collectors;
 public class FluxTest {
 
 
+    /**
+     * This is a Supplier
+     * @return a Flux<Long>
+     */
+    private Flux<Long> getFluxInterval2() {
+        return  Flux.interval(Duration.ofMillis(200))
+                .log();
+    }
+
+    @Test
+    @DisplayName("infinite sequence")
+    void test12() throws InterruptedException {
+/*        Flux<Long> flux1 = Flux.interval(Duration.ofMillis(200)) // no lo acepta asi
+                .log();*/
+
+     //   flux1.subscribe(System.out::println);
+
+        StepVerifier.withVirtualTime(this::getFluxInterval2)
+                .expectSubscription()
+                .thenAwait(Duration.ofMillis(1000)) // wait 5 emitions
+                .expectNextCount(5) // count 5 element
+                .thenCancel()
+                .verify();
+
+/*        08:26:19.202 [main] INFO reactor.Flux.Interval.2 - onNext(0)
+        08:26:19.202 [main] INFO reactor.Flux.Interval.2 - onNext(1)
+        08:26:19.202 [main] INFO reactor.Flux.Interval.2 - onNext(2)
+        08:26:19.202 [main] INFO reactor.Flux.Interval.2 - onNext(3)
+        08:26:19.202 [main] INFO reactor.Flux.Interval.2 - onNext(4)*/
+
+    }
+
+
+
 
     @Test
     @DisplayName("flux concat letters 2 by 2")
